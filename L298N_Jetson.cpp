@@ -9,7 +9,7 @@
  * Created on May 23, 2020, 12:58 AM
  */
 
-#include "L298N_Jetson.h"
+#include "L298N_Jetson.hpp"
 
 L298N_Jetson::L298N_Jetson() = default;
 

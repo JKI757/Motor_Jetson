@@ -11,8 +11,7 @@
  * Created on May 23, 2020, 12:58 AM
  */
 
-#ifndef L298N_JETSON_H
-#define L298N_JETSON_H
+#pragma once 
 
 #include <JetsonGPIO.h>
 #include <memory>
@@ -46,5 +45,4 @@ private:
 
 };
 
-#endif /* L298N_JETSON_H */
 
