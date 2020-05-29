@@ -14,6 +14,9 @@
 #include "L298N_Jetson.hpp"
 #include "Servo.hpp"
 #include <memory>
+#include <iostream>
+#include <string>
+#include "JetsonGPIO.h"
 
 class Motor_Jetson {
 
@@ -22,8 +25,21 @@ public:
     typedef enum {FORWARD, BACKWARD, STOP} Direction;
     typedef enum {DRIVE, TURNLEFT, TURNRIGHT, CHANGEDIRECTION, BRAKE } Command;
 
-    Motor_Jetson(const unsigned char DrivePWMPin, const unsigned char DriveIn1Pin, 
-    const unsigned char DriveIn2Pin, const unsigned char SteeringPWMPin);
+    Motor_Jetson(
+    int DrivePWMPin, 
+    int DriveIn1Pin, 
+    int DriveIn2Pin, 
+    int SteeringPWMPin);
+    
+    Motor_Jetson(
+        int DrivePWMPin, 
+        int DriveIn1Pin,
+        int DriveIn2Pin, 
+        int SteeringPWMPin,
+        const unsigned short minUs,
+        const unsigned short maxUs,
+        const unsigned short mapMin,
+        const unsigned short mapMax);
 
     ~Motor_Jetson();
 
@@ -44,8 +60,10 @@ public:
     void turnLeft(short angle);
 
 private:
-
-    std::unique_ptr<Servo> steering;
+    std::shared_ptr<GPIO::PWM> steer_pwm;
+    std::shared_ptr<GPIO::PWM> drive_pwm;
+    
+    std::unique_ptr<Servo_Jetson> steer;
     std::unique_ptr<L298N_Jetson> drive;
     short currentSpeed;
     Direction currentDirection;

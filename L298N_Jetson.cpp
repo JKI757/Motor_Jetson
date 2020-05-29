@@ -14,12 +14,15 @@
 L298N_Jetson::L298N_Jetson() = default;
 
 L298N_Jetson::~L298N_Jetson() {
+    
     this->Drive_PWM->stop();
-    GPIO::cleanup();
+    if (this->setup){
+        GPIO::cleanup();
+    }
 };
 
-L298N_Jetson::L298N_Jetson(const unsigned char EnablePin,
-        const unsigned char IN1, const unsigned char IN2) {
+L298N_Jetson::L298N_Jetson(int EnablePin,
+        int IN1, int IN2) {
     this->Enable = EnablePin;
     this->IN1 = IN1;
     this->IN2 = IN2;
@@ -29,18 +32,33 @@ L298N_Jetson::L298N_Jetson(const unsigned char EnablePin,
     GPIO::setup(this->IN2, GPIO::OUT,GPIO::LOW);
     GPIO::setup(this->Enable, GPIO::OUT, GPIO::HIGH);
     this->Drive_PWM = std::make_shared<GPIO::PWM>(this->Enable, 50);
+    this->setup = true;
     // approximately 50hz is the correct frequency for the L298N board
 }
 
-L298N_Jetson::L298N_Jetson(const unsigned char pinIN1, const unsigned char pinIN2) {
+L298N_Jetson::L298N_Jetson(int pinIN1, int pinIN2) {
     this->IN1 = IN1;
     this->IN2 = IN2;
     this->pwmVal = 0;
     GPIO::setmode(GPIO::BOARD);
     GPIO::setup(this->IN1, GPIO::OUT,GPIO::LOW);
     GPIO::setup(this->IN2, GPIO::OUT,GPIO::LOW);
+    this->setup = true;
 
 }
+
+L298N_Jetson::L298N_Jetson(std::shared_ptr<GPIO::PWM> drive, int IN1, int IN2, bool setup){
+    this->Drive_PWM = drive;
+    this->IN1 = IN1;
+    this->IN2 = IN2;
+    this->pwmVal = 0;
+    GPIO::setup(this->IN1, GPIO::OUT,GPIO::LOW);
+    GPIO::setup(this->IN2, GPIO::OUT,GPIO::LOW);
+    this->setup = false; // this tells the object we didn't create the PWM object and thus can't destroy it or stop PWM
+                        // The argument doesn't matter, we have to have another argument so the override doesn't collide with
+                        // the other constructor
+}
+
 void L298N_Jetson::setSpeed(const unsigned char  pwmVal){
     this->pwmVal = pwmVal;
 }
@@ -59,8 +77,8 @@ void L298N_Jetson::backward(){
 }
 void L298N_Jetson::run(){
     //this->Drive_PWM->ChangeDutyCycle( (this->pwmVal) / 255.0 );
-    this->Drive_PWM->start((this->pwmVal) / 255.0);
-    //important -- you need to send in values from [0, 255].  These are mapped to
+    this->Drive_PWM->start((this->pwmVal) );
+    //important -- you need to send in values from [0, 100].  These are a percentage
     //a percentage for the GPIO library
 }
 void L298N_Jetson::stop(){
